@@ -1,0 +1,5 @@
+# no .class files
+*.class
+
+# Ignore the documentation folder
+Documentation/
