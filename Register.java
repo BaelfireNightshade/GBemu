@@ -277,28 +277,28 @@ public class Register
 	}
 
 	public static void dumpRegisters(String message)
-		{
-			System.out.println("DEBUG: " + message);
-			System.out.println("DEBUG: Dumping Registers to console");
-			System.out.printf("\n\trA: 0x%02X\n", Register.readA());
-			System.out.printf("\trF: 0x%02X\n", Register.readF());
-			System.out.printf("\trB: 0x%02X\n", Register.readB());
-			System.out.printf("\trC: 0x%02X\n", Register.readC());
-			System.out.printf("\trD: 0x%02X\n", Register.readD());
-			System.out.printf("\trE: 0x%02X\n", Register.readE());
+	{
+		System.out.println("DEBUG: " + message);
+		System.out.println("DEBUG: Dumping Registers to console");
+		System.out.printf("\n\trA: 0x%02X\n", Register.readA());
+		System.out.printf("\trF: 0x%02X\n", Register.readF());
+		System.out.printf("\trB: 0x%02X\n", Register.readB());
+		System.out.printf("\trC: 0x%02X\n", Register.readC());
+		System.out.printf("\trD: 0x%02X\n", Register.readD());
+		System.out.printf("\trE: 0x%02X\n", Register.readE());
 
-			System.out.println();
+		System.out.println();
 
-			System.out.printf("\trPC: 0x%04X\n", Register.readPC());
-			System.out.printf("\trSP: 0x%04X\n", Register.readSP());
+		System.out.printf("\trPC: 0x%04X\n", Register.readPC());
+		System.out.printf("\trSP: 0x%04X\n", Register.readSP());
 
-			System.out.println();
+		System.out.println();
 
-			System.out.println("DEBUG: Flags");
-			System.out.println("\tZ: " + Register.getZeroFlag());
-			System.out.println("\tN: " + Register.getSubtFlag());
-			System.out.println("\tH: " + Register.getHCarryFlag());
-			System.out.println("\tC: " + Register.getCarryFlag());
+		System.out.println("DEBUG: Flags");
+		System.out.println("\tZ: " + Register.getZeroFlag());
+		System.out.println("\tN: " + Register.getSubtFlag());
+		System.out.println("\tH: " + Register.getHCarryFlag());
+		System.out.println("\tC: " + Register.getCarryFlag());
 	}
 
 
