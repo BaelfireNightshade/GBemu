@@ -13,39 +13,40 @@ public class Memory
 		int data = 0;
 		if(address < 0x8000)//Cartrige ROM
 		{
-			Cartridge.read(address);
+			data = Cartridge.read(address);
 		}
 		else if(address < 0xA000)//VRAM
 		{
-			//VRAM.read(address);
+			//data = VRAM.read(address);
 		}
 		else if(address < 0xC000)//Cartrige RAM
 		{
-			//Cartridge.read(address);
+			//data = Cartridge.read(address);
 		}
 		else if(address < 0xFE00)//Both workRAM banks + mirror
 		{
-			//InternalRAM.read(address);
+			//data = InternalRAM.read(address);
 		}
 		else if(address < 0xFEA0)//OAM
 		{
-			//SprintAttribMemory.read(address);
+			//data = SprintAttribMemory.read(address);
 		}
 		else if(address < 0xFF00)//Not useable
 		{
 			System.out.printf("DEBUG: Tried accessing invalid memory address: 0x%04X\n" , address);
+			data = 0xFF;
 		}
 		else if(address < 0xFF80)//I/0 Ports
 		{
-			//IO.read(address);
+			//data = IO.read(address);
 		}
 		else if(address < 0xFFFF)//High RAM
 		{
-			//InternalRAM.read(address);
+			//data = InternalRAM.read(address);
 		}
 		else if(address == 0xFFFF)//Internal Enable Register
 		{
-			//Interrupt.read(address);
+			//data = Interrupt.read(address);
 		}
 		else
 		{
