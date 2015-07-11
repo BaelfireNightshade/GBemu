@@ -76,23 +76,3 @@ public class BitTwiddling
 		0xAA00, 0xAA02, 0xAA08, 0xAA0A, 0xAA20, 0xAA22, 0xAA28, 0xAA2A,
 		0xAA80, 0xAA82, 0xAA88, 0xAA8A, 0xAAA0, 0xAAA2, 0xAAA8, 0xAAAA
 	};
-
-//For testing code. Not really designed to be used.
-	public static void main(String [] args)
-	{
-/*		//Test to make sure interleave works properly
-		System.out.printf("0x%04X", interleave(0x96, 0x69));
-		//*/
-
-/*		//Test to make sure preshifting done correctly
-		for( int i = 0; i < mortonTableX.length; i++)
-		{
-			if(mortonTableX[i] != (mortonTableY[i] << 1))
-			{
-				int row = i / 8;
-				int collum = i % 8;
-				System.out.println("Element " + i + "is not double. Row:" + row + " Collum:" + collum);
-			}
-		}//*/
-	}
-}
