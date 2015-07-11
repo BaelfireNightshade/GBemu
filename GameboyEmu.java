@@ -1,3 +1,11 @@
+/*
+
+	Todo:
+		2. Make File->ROMInfoMenuItem.
+		1. Move actionListeners to their own class. ActionListeners maybe. (for cleanup)
+
+*/
+
 import java.util.Scanner;
 import javax.swing.*;
 import java.awt.event.*;
@@ -25,7 +33,6 @@ public class GameboyEmu
 	{
 		System.out.println("Gameboy eMu");
 		System.out.println("Created by Tad Parrish\n");
-		System.out.println("Use a ROM with either no mbc or MBC1. Tetris was my testing ROM.");
 		frame = new JFrame("GBe\u03BC"); //Create frame for screen
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
@@ -49,6 +56,9 @@ public class GameboyEmu
 					{
 						System.out.println("Caught exception");
 					}
+					frame.setTitle("GB\u03BC: " + Cartridge.title);
+					screen.screenBlank();
+					screen.loadNintendoLogo(8*7, 4*17);
 				}
 			});
 		fileMenu.add(selectRomMenuItem);

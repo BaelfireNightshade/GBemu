@@ -24,6 +24,8 @@ public class Cartridge
 
 	private static int[] ram;
 
+	public static String title = "";
+
 	public static int mbc; //holds mbc type
 
 	public static final int MBC_NONE = 0;
@@ -99,8 +101,8 @@ public class Cartridge
 		{
 			cartTitle = cartTitle + (char)read(i);
 		}
-		GameboyEmu.frame.setTitle("GB\u03BC: " + cartTitle);
-		System.out.println("Cartridge Title: " + cartTitle);
+		title = cartTitle;
+		System.out.println("Cartridge Title: " + title);
 
 		//set the size of RAM
 		switch(rom[RAM_SIZE_ADDRESS])
@@ -164,9 +166,6 @@ public class Cartridge
 			default:
 				System.out.printf("DEBUG: Cartridge Type unknown. rom[0x0147]: %02X\n", rom[CART_TYPE_ADDRESS]);
 		}
-
-		GameboyEmu.screen.screenBlank();
-		GameboyEmu.screen.loadNintendoLogo(8*7, 4*17);
 	}
 
 	public static int read(int address)
