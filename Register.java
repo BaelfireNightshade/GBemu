@@ -170,6 +170,12 @@ public class Register
 		return regPC;
 	}
 
+	// Increment PC
+	public static void incPC(int x)
+	{
+		regPC = ((regPC + x) & 0xFFFF);
+	}
+
 
 	// set and get zero(z) flag in regF
 	public static boolean getZeroFlag()
@@ -294,4 +300,6 @@ public class Register
 			System.out.println("\tH: " + Register.getHCarryFlag());
 			System.out.println("\tC: " + Register.getCarryFlag());
 	}
+
+
 }
