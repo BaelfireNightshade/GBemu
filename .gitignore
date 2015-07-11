@@ -1,5 +1,9 @@
 # no .class files
 *.class
 
+# no .bat files
+*.bat
+*.BAT
+
 # Ignore the documentation folder
 Documentation/
