@@ -269,6 +269,11 @@ public class Register
 
 		System.out.println();
 
+		System.out.printf("\trPC: 0x%04X\n", Register.readPC());
+		System.out.printf("\trSP: 0x%04X\n", Register.readSP());
+
+		System.out.println();
+
 		System.out.println("DEBUG: Flags");
 		System.out.println("\tZ: " + Register.getZeroFlag());
 		System.out.println("\tN: " + Register.getSubtFlag());
