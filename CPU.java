@@ -28,6 +28,12 @@ public class CPU
 	{
 		//reset memory
 		//reset registers
+		Register.writeAF(0x01B0);
+		Register.writeBC(0x0013);
+		Register.writeDE(0x00D8);
+		Register.writeHL(0x014D);
+		Register.writeSP(0xFFFE);
+		Register.writePC(0x0100);
 		//reset cartridge
 		//reset video
 		//reset sound
