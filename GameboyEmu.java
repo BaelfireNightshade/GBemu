@@ -10,8 +10,12 @@ import java.util.Scanner;
 import javax.swing.*;
 import java.awt.event.*;
 import java.io.IOException;
+import java.lang.Thread;
+import java.lang.InterruptedException;
 public class GameboyEmu
 {
+
+	public static boolean running = false;
 
 	public static JFrame frame;
 	public static Screen screen;
@@ -30,6 +34,7 @@ public class GameboyEmu
 
 	//Main program
 	public static void main(String[]args)
+	throws InterruptedException
 	{
 		System.out.println("Gameboy eMu");
 		System.out.println("Created by Tad Parrish\n");
@@ -59,6 +64,8 @@ public class GameboyEmu
 					frame.setTitle("GB\u03BC: " + Cartridge.title);
 					screen.screenBlank();
 					screen.loadNintendoLogo(8*7, 4*17);
+
+					running = true;
 				}
 			});
 		fileMenu.add(selectRomMenuItem);
@@ -96,46 +103,22 @@ public class GameboyEmu
 		frame.pack();
 		frame.setVisible(true);
 
-		//select and load the Gameboy ROM( *.gb )
-		/*
-		try
-		{
-			Cartridge.selectROM();
-		}
-		catch(IOException ioe)
-		{
-			System.out.println("Caught exception");
-		}
-		//*/
-
-		//CartridgeTest.test();
-
 		screen.testScreen();
-		//screen.repaint();
 
-/*		//Test for initial ROM import to memory
-		for(int i = 0;i < 0x10; i++)
+		boolean reset = false;
+		while(true)
 		{
-			System.out.printf("ROM addr: 0x%04X = 0x%02X\n", i, ROM.read(i));
+			if((reset == false) && (running == true))
+			{
+				CPU.reset();
+				reset = true;
+			}
+			while(running)
+			{
+				CPU.run();
+			}
+			Thread.sleep(80); //give time for reset/running to update.
 		}
-//*/
-/*		//Test for opcode add a, a
-		Scanner scan = new Scanner(System.in);
 
-		System.out.println("\tTest for ADD A, A");
-		System.out.print("Enter a number to set regA: ");
-
-		int input = scan.nextInt();
-
-		Register.writeA(input);
-		Instruction.add_A_A();
-
-		Register.dumpRegisters();
-//*/
-/*		//Test for zeroFlag
-		System.out.println("DEBUG: ZeroFlag from main: " + Register.getZeroFlag());
-		Instruction.test();
-		System.out.println("DEBUG: ZeroFlag from main: " + Register.getZeroFlag());
-//*/
 	}
 }
