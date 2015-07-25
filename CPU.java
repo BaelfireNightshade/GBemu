@@ -11,6 +11,8 @@ import java.lang.System; //used for System.nanoTime()
 
 public class CPU
 {
+	public static int clock = 0;
+
 	private static long nextCycle = 0;
 
 	private static final int INSTR_TIME_STEP = 954;
@@ -20,6 +22,7 @@ public class CPU
 	{
 		if(System.nanoTime() > nextCycle)
 		{
+			clock++;
 			machineCycle();
 		}
 	}

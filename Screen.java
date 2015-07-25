@@ -17,18 +17,138 @@ public class Screen extends JPanel
 	private Color color2 = new Color(99, 99, 99);//Dark grey
 	private Color color3 = Color.black;
 
+	public final int SCREEN_SIZE_X = 160;
+	public final int SCREEN_SIZE_Y = 144;
+
+	private int nextClock = 0;
+
 	public int scale = 4;
 
 	public Screen()
 	{
 		setBackground(color0);
-		setPreferredSize(new Dimension(160 * scale, 144 * scale));
-		screen = new int[160][144];
+		setPreferredSize(new Dimension(SCREEN_SIZE_X * scale, SCREEN_SIZE_Y * scale));
+		screen = new int[SCREEN_SIZE_X][SCREEN_SIZE_Y];
 	}
 
 	public void paintComponent(Graphics page)
 	{
 		draw(page);
+	}
+
+	public void update()
+	{
+		if((nextClock <= CPU.clock) && ((IO.LCDC & 0x80) == 0x80))
+		{
+			int mode = (IO.STAT & 0x03);
+
+			switch(mode)
+			{
+				case 0:
+					if(IO.LY == 143)
+					{
+						IO.STAT = (IO.STAT & 0xFC) | 0x1;
+					}
+					else
+					{
+						IO.STAT = (IO.STAT & 0xFC) | 0x2;
+					}
+				break;
+				case 1:
+					IO.STAT = (IO.STAT & 0xFC) | 0x2;
+				break;
+				case 2:
+					IO.STAT = (IO.STAT & 0xFC) | 0x3;
+				break;
+				case 3:
+					IO.STAT = (IO.STAT & 0xFC) | 0x0;
+				break;
+				default:
+					System.out.println("\nDEBUG: Something went wrong with the Screen Controller. Mode " + mode + ".");
+				break;
+			}
+
+			mode = (IO.STAT & 0x03);
+
+			switch(mode)
+			{
+				case 0:
+					nextClock += 204;
+				break;
+				case 1:
+					repaint();
+					IO.LY = -1;
+					nextClock += 4560;
+				break;
+				case 2:
+					nextClock += 80;
+				break;
+				case 3:
+					scanline();
+					nextClock += 172;
+				break;
+				default:
+					System.out.println("\nDEBUG: Something went wrong with the Screen Controller. Mode " + mode + ".");
+				break;
+			}
+		}
+	}
+
+	public void scanline()
+	{
+		//update current scanline
+		IO.LY += 1;
+
+		int currentBgLine = (IO.LY + IO.SCY) % 256;
+
+		//background
+		if((IO.LCDC & 0x01) == 0x01)
+		{
+			int baseBgMapAddress;
+			if((IO.LCDC & 0x08) == 0x08)
+			{
+				baseBgMapAddress = 0x9C00;
+			}
+			else
+			{
+				baseBgMapAddress = 0x9800;
+			}
+			int [] fullBgLine = new int[256];
+
+			//fill the current line of background
+			for(int currentTile = 0; currentTile < 32; currentTile++)
+			{
+				int tileIndex = Memory.read(baseBgMapAddress + ((currentBgLine / 8) + currentTile));
+
+				int tileAddress = bgWinTileAddress(tileIndex);
+				//which line in tile
+				int tileLine = currentBgLine % 8;
+				//Interlace bits
+				int tilePart1 = Memory.read(tileAddress + (tileLine * 2) + 1);
+				int tilePart2 = Memory.read(tileAddress + (tileLine * 2));
+				//System.out.printf("TP1: 0x%04X TP2: 0x%04X\n", tilePart1, tilePart2);
+				int lineOfPixels = BitTwiddling.interleave(tilePart1, tilePart2);
+
+				//fill the current line of the current tile
+				for(int pixel = 0; pixel < 8; pixel++)
+				{
+					fullBgLine[((currentTile * 8) + (7 - pixel))] = (lineOfPixels >> (pixel * 2)) & 0x3;
+				}
+			}
+
+			//set up bg color palette
+			int [] bgPallet = new int[4];
+			for(int x = 0; x < 4; x++)
+			{
+				bgPallet[x] = (IO.BGP >> (x * 2)) & 0x3;
+			}
+
+			//copy bg to screen
+			for(int pixel = 0; pixel < SCREEN_SIZE_X; pixel++)
+			{
+				screen[pixel][IO.LY] = bgPallet[fullBgLine[((pixel + IO.SCX) % 256)]];
+			}
+		}
 	}
 
 	public void draw(Graphics g)
@@ -72,6 +192,20 @@ public class Screen extends JPanel
 		repaint();
 	}
 
+	public int bgWinTileAddress(int tileIndex)
+	{
+		int address = 0;
+		if((IO.LCDC & 0x10) == 0x10)
+		{
+			address = 0x8000 + (tileIndex * 0x10);
+		}
+		else
+		{
+			address = 0x8800 + (((tileIndex ^ 0x80) * 0x10) * 16);
+		}
+		return (address & 0xFFFF);
+	}
+
 	public void loadTile(int xOff, int yOff, int[][] tile)
 	{
 		for(int x = 0; x < tile.length; x++)
@@ -96,7 +230,7 @@ public class Screen extends JPanel
 		//First byte is y, second is x
 		for(int line = 0; line < size; line++)
 		{
-			int fullLine = BitTwiddling.interleave(Cartridge.read(address + (line * 2) + 1), Cartridge.read(address + (line * 2)));
+			int fullLine = BitTwiddling.interleave(Memory.read(address + (line * 2) + 1), Memory.read(address + (line * 2)));
 			for(int collum = 0; collum < 8; collum++)
 			{
 				tile[7 - collum][line] = (fullLine >>> collum * 2) & 0x3;
@@ -134,7 +268,7 @@ public class Screen extends JPanel
 				//fill in each pixel of 4x4 block
 				for(int y = 0; y < 4; y++)
 				{
-					data = Cartridge.read(address);
+					data = Memory.read(address);
 					//System.out.printf("0x%02X\n", data);
 					for(int x = 0; x < 4; x++)
 					{

@@ -116,6 +116,7 @@ public class GameboyEmu
 			while(running)
 			{
 				CPU.run();
+				screen.update();
 			}
 			Thread.sleep(80); //give time for reset/running to update.
 		}

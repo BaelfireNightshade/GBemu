@@ -10,6 +10,7 @@ public class Memory
 {
 	public static int read(int address)
 	{
+		//System.out.printf("DEBUG: Memory read: 0x%04X\n", address);
 		int data = 0;
 		if(address < 0x8000)//Cartrige ROM
 		{
@@ -17,7 +18,7 @@ public class Memory
 		}
 		else if(address < 0xA000)//VRAM
 		{
-			//data = VRAM.read(address);
+			data = VRAM.read(address);
 		}
 		else if(address < 0xC000)//Cartrige RAM
 		{
@@ -38,7 +39,7 @@ public class Memory
 		}
 		else if(address < 0xFF80)//I/0 Ports
 		{
-			//data = IO.read(address);
+			data = IO.read(address);
 		}
 		else if(address < 0xFFFF)//High RAM
 		{
@@ -64,7 +65,7 @@ public class Memory
 			}
 			else if(address < 0xA000)//VRAM
 			{
-				//VRAM.write(address, data);
+				VRAM.write(address, data);
 			}
 			else if(address < 0xC000)//Cartrige RAM
 			{
@@ -84,7 +85,7 @@ public class Memory
 			}
 			else if(address < 0xFF80)//I/0 Ports
 			{
-				//IO.write(address, data);
+				IO.write(address, data);
 			}
 			else if(address < 0xFFFF)//High RAM
 			{
