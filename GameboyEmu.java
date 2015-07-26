@@ -113,9 +113,13 @@ public class GameboyEmu
 				CPU.reset();
 				reset = true;
 			}
+			CPU cpu = new CPU();
+			if(running)
+			{
+				cpu.start();
+			}
 			while(running)
 			{
-				CPU.run();
 				screen.update();
 			}
 			Thread.sleep(80); //give time for reset/running to update.

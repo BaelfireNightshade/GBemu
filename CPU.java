@@ -9,7 +9,7 @@
 
 import java.lang.System; //used for System.nanoTime()
 
-public class CPU
+public class CPU extends Thread
 {
 	public static int clock = 0;
 
@@ -18,12 +18,14 @@ public class CPU
 	private static final int INSTR_TIME_STEP = 954;
 
 	//used to check if time to execute next machine instruction
-	public static void run()
+	public void run()
 	{
-		if(System.nanoTime() > nextCycle)
+		while(true)
 		{
-			clock++;
-			machineCycle();
+			if(System.nanoTime() > nextCycle)
+			{
+				clock += machineCycle();
+			}
 		}
 	}
 
@@ -41,13 +43,12 @@ public class CPU
 		//reset video
 		//reset sound
 
-
 		//set initial Instruction time
 		nextCycle = System.nanoTime();
 		nextCycle += INSTR_TIME_STEP;
 	}
 
-	public static void machineCycle()
+	public static int machineCycle()
 	{
 		int cyclesUsed = 0;
 		int instruction = 0;
@@ -286,5 +287,6 @@ public class CPU
 		}
 
 		nextCycle += (cyclesUsed * INSTR_TIME_STEP);
+		return (cyclesUsed << 10);
 	}
 }

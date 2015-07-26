@@ -22,6 +22,8 @@ public class Screen extends JPanel
 
 	private int nextClock = 0;
 
+	private long lastTime;
+
 	public int scale = 4;
 
 	public Screen()
@@ -77,6 +79,10 @@ public class Screen extends JPanel
 				break;
 				case 1:
 					repaint();
+					/*long currentTime = System.nanoTime();
+					double fps = 1000000000.0 / (currentTime - lastTime);
+					lastTime = currentTime;
+					System.out.println("fps: " + fps);*/
 					IO.LY = -1;
 					nextClock += 4560;
 				break;
