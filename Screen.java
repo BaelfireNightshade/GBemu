@@ -74,22 +74,23 @@ public class Screen extends JPanel
 
 			switch(mode)
 			{
-				case 0:
+				case 0: //H-blank
 					nextClock += 204;
 				break;
-				case 1:
+				case 1: //V-blank
+					IO.IF = IO.IF | 0x01;
 					repaint();
 					/*long currentTime = System.nanoTime();
 					double fps = 1000000000.0 / (currentTime - lastTime);
 					lastTime = currentTime;
-					System.out.println("fps: " + fps);*/
+					System.out.println("fps: " + fps);//*/
 					IO.LY = -1;
 					nextClock += 4560;
 				break;
-				case 2:
+				case 2: //Searching OAM-RAM
 					nextClock += 80;
 				break;
-				case 3:
+				case 3: //Transfering Data to LCD Driver
 					scanline();
 					nextClock += 172;
 				break;
