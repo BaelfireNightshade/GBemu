@@ -14,11 +14,15 @@ public class IO
 	public static int OBP0 = 0xFF; //LCD Object Palette 0 Data
 	public static int OBP1 = 0xFF; //LCD Object Palette 1 Data
 
+	//Interrupt Registers
+	public static int IF = 0;
+
 	public static int read(int address)
 	{
 		int data = 0xFF;
 		switch(address)
 		{
+			//LCD
 			case 0xFF40:
 				data = LCDC;
 			break;
@@ -52,6 +56,11 @@ public class IO
 			case 0xFF49:
 				data = OBP1;
 			break;
+
+			//Interrupt
+			case 0xFF0F:
+				data = IF | 0xE0;
+			break;
 		}
 
 		return data;
@@ -61,6 +70,7 @@ public class IO
 	{
 		switch(address)
 		{
+			//LCD
 			case 0xFF40:
 				LCDC = (data & 0xFF);
 			break;
@@ -92,6 +102,11 @@ public class IO
 			break;
 			case 0xFF49:
 				OBP1 = (data & 0xFF);
+			break;
+
+			//Interrupt
+			case 0xFF0F:
+				IF = (data & 0x1F);
 			break;
 		}
 	}

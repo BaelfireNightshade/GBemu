@@ -158,6 +158,16 @@ public class Register
 		return regSP;
 	}
 
+	public static void decSP()
+	{
+		regSP = (regSP - 1) & 0xFFFF;
+	}
+
+	public static void incSP()
+	{
+		regSP = (regSP + 1) & 0xFFFF;
+	}
+
 
 	// R/W for PC
 	public static void writePC(int data)

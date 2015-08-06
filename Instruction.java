@@ -826,6 +826,159 @@ public class Instruction
 	}
 
 
+	//Section 3.3.1-4 8-bit Loads
+	public static int ld_$HL_A() //opcode: 0x77
+	{
+		int data = Register.readA();
+		Memory.write(Register.readHL(), data);
+
+		//increase PC to next instruction
+		Register.incPC(1);
+
+		//return instruction time
+		return 2;
+	}
+
+
+	//Section 3.3.2-6 16-bit Loads
+	public static int push_AF() //opcode: 0xF5
+	{
+		//decrement SP
+		Register.decSP();
+		//Store A
+		Memory.write(Register.readSP(), Register.readA());
+		//decrement SP
+		Register.decSP();
+		//Store F
+		Memory.write(Register.readSP(), Register.readF());
+
+		Register.incPC(1);
+
+		//return instruction time
+		return 4;
+	}
+
+	public static int push_BC() //opcode: 0xC5
+	{
+		//decrement SP
+		Register.decSP();
+		//Store B
+		Memory.write(Register.readSP(), Register.readB());
+		//decrement SP
+		Register.decSP();
+		//Store C
+		Memory.write(Register.readSP(), Register.readC());
+
+		Register.incPC(1);
+
+		//return instruction time
+		return 4;
+	}
+
+	public static int push_DE() //opcode: 0xD5
+	{
+		//decrement SP
+		Register.decSP();
+		//Store D
+		Memory.write(Register.readSP(), Register.readD());
+		//decrement SP
+		Register.decSP();
+		//Store E
+		Memory.write(Register.readSP(), Register.readE());
+
+		Register.incPC(1);
+
+		//return instruction time
+		return 4;
+	}
+
+	public static int push_HL() //opcode: 0xE5
+	{
+		//decrement SP
+		Register.decSP();
+		//Store H
+		Memory.write(Register.readSP(), Register.readH());
+		//decrement SP
+		Register.decSP();
+		//Store L
+		Memory.write(Register.readSP(), Register.readL());
+
+		Register.incPC(1);
+
+		//return instruction time
+		return 4;
+	}
+
+	//Section 3.3.2-7 16-bit loads
+	public static int pop_AF() //opcode: 0xF1
+	{
+		//Get F
+		Register.writeF(Memory.read(Register.readSP()));
+		//increment SP
+		Register.incSP();
+		//get A
+		Register.writeA(Memory.read(Register.readSP()));
+		//increment SP
+		Register.incSP();
+
+		Register.incPC(1);
+
+		//return instruction time
+		return 3;
+	}
+
+	public static int pop_BC() //opcode: 0xC1
+	{
+		//Get C
+		Register.writeC(Memory.read(Register.readSP()));
+		//increment SP
+		Register.incSP();
+		//get B
+		Register.writeB(Memory.read(Register.readSP()));
+		//increment SP
+		Register.incSP();
+
+		Register.incPC(1);
+
+		//return instruction time
+		return 3;
+	}
+
+	public static int pop_DE() //opcode: 0xD1
+	{
+		//Get E
+		Register.writeE(Memory.read(Register.readSP()));
+		//increment SP
+		Register.incSP();
+		//get D
+		Register.writeD(Memory.read(Register.readSP()));
+		//increment SP
+		Register.incSP();
+
+		Register.incPC(1);
+
+		//return instruction time
+		return 3;
+	}
+
+	public static int pop_HL() //opcode: 0xE1
+	{
+		//Get L
+		Register.writeL(Memory.read(Register.readSP()));
+		//increment SP
+		Register.incSP();
+		//get H
+		Register.writeH(Memory.read(Register.readSP()));
+		//increment SP
+		Register.incSP();
+
+		Register.incPC(1);
+
+		//return instruction time
+		return 3;
+	}
+
+
 	//Section 3.3.3-1 8-bit ALU
 	public static int add_A_A() //opcode: 0x87
 	{
@@ -872,7 +1025,376 @@ public class Instruction
 		return 1;
 	}
 
-	//Section 3.3.3-1 8-bit ALU
+	public static int add_A_B() //opcode: 0x80
+	{
+		int a = Register.readA();
+		int b = Register.readB();
+		int sum = a + b;
+		int halfSum = (a & 0x0F) + (b & 0x0F);
+
+		if((sum & 0xFF) == 0)
+		{
+			Register.setZeroFlag(true);
+		}
+		else
+		{
+			Register.setZeroFlag(false);
+		}
+
+		Register.setSubtFlag(false);
+
+		if(halfSum == (halfSum & 0x0F))
+		{
+			Register.setHCarryFlag(false);
+		}
+		else
+		{
+			Register.setHCarryFlag(true);
+		}
+
+		if(sum == (sum & 0xFF))
+		{
+			Register.setCarryFlag(false);
+		}
+		else
+		{
+			Register.setCarryFlag(true);
+		}
+
+		//write sum to Register A
+		Register.writeA(sum & 0xFF);
+
+		//increase PC to next instruction
+		Register.incPC(1);
+
+		//return how many cycles / 4 instruction took.
+		return 1;
+	}
+
+	public static int add_A_C() //opcode: 0x81
+	{
+		int a = Register.readA();
+		int b = Register.readC();
+		int sum = a + b;
+		int halfSum = (a & 0x0F) + (b & 0x0F);
+
+		if((sum & 0xFF) == 0)
+		{
+			Register.setZeroFlag(true);
+		}
+		else
+		{
+			Register.setZeroFlag(false);
+		}
+
+		Register.setSubtFlag(false);
+
+		if(halfSum == (halfSum & 0x0F))
+		{
+			Register.setHCarryFlag(false);
+		}
+		else
+		{
+			Register.setHCarryFlag(true);
+		}
+
+		if(sum == (sum & 0xFF))
+		{
+			Register.setCarryFlag(false);
+		}
+		else
+		{
+			Register.setCarryFlag(true);
+		}
+
+		//write sum to Register A
+		Register.writeA(sum & 0xFF);
+
+		//increase PC to next instruction
+		Register.incPC(1);
+
+		//return how many cycles / 4 instruction took.
+		return 1;
+	}
+
+	public static int add_A_D() //opcode: 0x82
+	{
+		int a = Register.readA();
+		int b = Register.readD();
+		int sum = a + b;
+		int halfSum = (a & 0x0F) + (b & 0x0F);
+
+		if((sum & 0xFF) == 0)
+		{
+			Register.setZeroFlag(true);
+		}
+		else
+		{
+			Register.setZeroFlag(false);
+		}
+
+		Register.setSubtFlag(false);
+
+		if(halfSum == (halfSum & 0x0F))
+		{
+			Register.setHCarryFlag(false);
+		}
+		else
+		{
+			Register.setHCarryFlag(true);
+		}
+
+		if(sum == (sum & 0xFF))
+		{
+			Register.setCarryFlag(false);
+		}
+		else
+		{
+			Register.setCarryFlag(true);
+		}
+
+		//write sum to Register A
+		Register.writeA(sum & 0xFF);
+
+		//increase PC to next instruction
+		Register.incPC(1);
+
+		//return how many cycles / 4 instruction took.
+		return 1;
+	}
+
+	public static int add_A_E() //opcode: 0x83
+	{
+		int a = Register.readA();
+		int b = Register.readE();
+		int sum = a + b;
+		int halfSum = (a & 0x0F) + (b & 0x0F);
+
+		if((sum & 0xFF) == 0)
+		{
+			Register.setZeroFlag(true);
+		}
+		else
+		{
+			Register.setZeroFlag(false);
+		}
+
+		Register.setSubtFlag(false);
+
+		if(halfSum == (halfSum & 0x0F))
+		{
+			Register.setHCarryFlag(false);
+		}
+		else
+		{
+			Register.setHCarryFlag(true);
+		}
+
+		if(sum == (sum & 0xFF))
+		{
+			Register.setCarryFlag(false);
+		}
+		else
+		{
+			Register.setCarryFlag(true);
+		}
+
+		//write sum to Register A
+		Register.writeA(sum & 0xFF);
+
+		//increase PC to next instruction
+		Register.incPC(1);
+
+		//return how many cycles / 4 instruction took.
+		return 1;
+	}
+
+	public static int add_A_H() //opcode: 0x84
+	{
+		int a = Register.readA();
+		int b = Register.readH();
+		int sum = a + b;
+		int halfSum = (a & 0x0F) + (b & 0x0F);
+
+		if((sum & 0xFF) == 0)
+		{
+			Register.setZeroFlag(true);
+		}
+		else
+		{
+			Register.setZeroFlag(false);
+		}
+
+		Register.setSubtFlag(false);
+
+		if(halfSum == (halfSum & 0x0F))
+		{
+			Register.setHCarryFlag(false);
+		}
+		else
+		{
+			Register.setHCarryFlag(true);
+		}
+
+		if(sum == (sum & 0xFF))
+		{
+			Register.setCarryFlag(false);
+		}
+		else
+		{
+			Register.setCarryFlag(true);
+		}
+
+		//write sum to Register A
+		Register.writeA(sum & 0xFF);
+
+		//increase PC to next instruction
+		Register.incPC(1);
+
+		//return how many cycles / 4 instruction took.
+		return 1;
+	}
+
+	public static int add_A_L() //opcode: 0x85
+	{
+		int a = Register.readA();
+		int b = Register.readL();
+		int sum = a + b;
+		int halfSum = (a & 0x0F) + (b & 0x0F);
+
+		if((sum & 0xFF) == 0)
+		{
+			Register.setZeroFlag(true);
+		}
+		else
+		{
+			Register.setZeroFlag(false);
+		}
+
+		Register.setSubtFlag(false);
+
+		if(halfSum == (halfSum & 0x0F))
+		{
+			Register.setHCarryFlag(false);
+		}
+		else
+		{
+			Register.setHCarryFlag(true);
+		}
+
+		if(sum == (sum & 0xFF))
+		{
+			Register.setCarryFlag(false);
+		}
+		else
+		{
+			Register.setCarryFlag(true);
+		}
+
+		//write sum to Register A
+		Register.writeA(sum & 0xFF);
+
+		//increase PC to next instruction
+		Register.incPC(1);
+
+		//return how many cycles / 4 instruction took.
+		return 1;
+	}
+
+	public static int add_A_$HL() //opcode: 0x86
+	{
+		int a = Register.readA();
+		int b = Memory.read(Register.readHL());
+		int sum = a + b;
+		int halfSum = (a & 0x0F) + (b & 0x0F);
+
+		if((sum & 0xFF) == 0)
+		{
+			Register.setZeroFlag(true);
+		}
+		else
+		{
+			Register.setZeroFlag(false);
+		}
+
+		Register.setSubtFlag(false);
+
+		if(halfSum == (halfSum & 0x0F))
+		{
+			Register.setHCarryFlag(false);
+		}
+		else
+		{
+			Register.setHCarryFlag(true);
+		}
+
+		if(sum == (sum & 0xFF))
+		{
+			Register.setCarryFlag(false);
+		}
+		else
+		{
+			Register.setCarryFlag(true);
+		}
+
+		//write sum to Register A
+		Register.writeA(sum & 0xFF);
+
+		//increase PC to next instruction
+		Register.incPC(1);
+
+		//return how many cycles / 4 instruction took.
+		return 1;
+	}
+
+	public static int add_A_n() //opcode: 0xC6
+	{
+		int a = Register.readA();
+		Register.incPC(1);
+		int b = Memory.read(Register.readPC());
+		int sum = a + b;
+		int halfSum = (a & 0x0F) + (b & 0x0F);
+
+		if((sum & 0xFF) == 0)
+		{
+			Register.setZeroFlag(true);
+		}
+		else
+		{
+			Register.setZeroFlag(false);
+		}
+
+		Register.setSubtFlag(false);
+
+		if(halfSum == (halfSum & 0x0F))
+		{
+			Register.setHCarryFlag(false);
+		}
+		else
+		{
+			Register.setHCarryFlag(true);
+		}
+
+		if(sum == (sum & 0xFF))
+		{
+			Register.setCarryFlag(false);
+		}
+		else
+		{
+			Register.setCarryFlag(true);
+		}
+
+		//write sum to Register A
+		Register.writeA(sum & 0xFF);
+
+		//increase PC to next instruction
+		Register.incPC(1);
+
+		//return how many cycles / 4 instruction took.
+		return 2;
+	}
+
+	//Section 3.3.3-7 8-bit ALU
 	public static int xor_A() //Opcode: 0xAF
 	{
 		int data = Register.readA();
@@ -1066,7 +1588,29 @@ public class Instruction
 		return 1;
 	}
 
-	//Section 3.3.8 Jumps
+	//Section 3.3.5-9 Miscellaneous
+	public static int di() //opcode: 0xF3
+	{
+		CPU.nextIME = false;
+
+		Register.incPC(1);
+
+		//return instruction time
+		return 1;
+	}
+
+	//Section 3.3.5-10 Miscellaneous
+	public static int ei() //opcode: 0xFB
+	{
+		CPU.nextIME = true;
+
+		Register.incPC(1);
+
+		//return instruction time
+		return 1;
+	}
+
+	//Section 3.3.8-1 Jumps
 	public static int jp_nn() //Opcode: 0xC3, 0xnn, 0xnn
 	{
 		int address = 0x0000;
@@ -1088,5 +1632,73 @@ public class Instruction
 		//return how many cycles / 4 instruction took.
 		return 3;
 	}
+
+	//Section 3.3.9-1 Calls
+	public static int call_nn() //Opcode: 0xCD, 0xnn, 0xnn
+	{
+		//Get LS byte
+		Register.incPC(1);
+		int low = Memory.read(Register.readPC());
+		//get MS byte
+		Register.incPC(1);
+		int high = Memory.read(Register.readPC());
+		//push PC of next instruction
+		Register.incPC(1);
+		push_PC();
+		//jump to address
+		int address = (high << 8) | low;
+		Register.writePC(address);
+
+		return 3;
+	}
+
+
+	//Section 3.3.11-3 Returns
+	public static int reti() //opcode 0xD9
+	{
+		pop_PC();
+		CPU.nextIME = true;
+
+		return 2;
+	}
+
+
+	//Extra instructions to make life simpler
+	public static void push_PC()
+	{
+		int data = Register.readPC();
+
+		//System.out.printf("\nDEBUG: pushing PC 0x%04X\n", data);
+
+		//decrement SP
+		Register.decSP();
+		//write High Byte of PC
+		int high = (data >>> 8) & 0xFF;
+		Memory.write(Register.readSP(), high);
+		//decrement SP
+		Register.decSP();
+		//write Low byte of PC
+		int low = data & 0xFF;
+		Memory.write(Register.readSP(), low);
+	}
+
+	public static void pop_PC()
+	{
+		//get low byte of PC
+		int low = Memory.read(Register.readSP());
+		//System.out.printf("\nDEBUG: popping low of PC. SP=0x%04X low=0x%02X", Register.readSP(), low );
+		//increment SP
+		Register.incSP();
+		//get high byte of PC
+		int high = Memory.read(Register.readSP());
+		//increment SP
+		Register.incSP();
+		//write address to PC
+		int data = (high << 8)|low;
+
+		//System.out.printf("\nDEBUG: popping PC 0x%04X\n", data);
+		Register.writePC(data);
+	}
+
 
 }

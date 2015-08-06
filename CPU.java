@@ -17,6 +17,8 @@ public class CPU extends Thread
 
 	private static final int INSTR_TIME_STEP = 954;
 
+	public static boolean nextIME = false;
+
 	//used to check if time to execute next machine instruction
 	public void run()
 	{
@@ -24,7 +26,15 @@ public class CPU extends Thread
 		{
 			if(System.nanoTime() > nextCycle)
 			{
-				clock += machineCycle();
+				if(!Interrupt.checkForInterrupts())
+				{
+					clock += machineCycle();
+				}
+				else
+				{
+					nextCycle += (5 * INSTR_TIME_STEP);
+					clock += 20;
+				}
 			}
 		}
 	}
@@ -52,6 +62,8 @@ public class CPU extends Thread
 	{
 		int cyclesUsed = 0;
 		int instruction = 0;
+
+		Interrupt.IME = nextIME;
 
 		//fetch
 		instruction = Memory.read(Register.readPC());
@@ -227,6 +239,9 @@ public class CPU extends Thread
 			case 0x75:
 				cyclesUsed = Instruction.ld_$HL_L();
 			break;
+			case 0x77:
+				cyclesUsed = Instruction.ld_$HL_A();
+			break;
 			case 0x78:
 				cyclesUsed = Instruction.ld_A_B();
 			break;
@@ -250,6 +265,27 @@ public class CPU extends Thread
 			break;
 			case 0x7F:
 				cyclesUsed = Instruction.ld_A_A();
+			break;
+			case 0x80:
+				cyclesUsed = Instruction.add_A_B();
+			break;
+			case 0x81:
+				cyclesUsed = Instruction.add_A_C();
+			break;
+			case 0x82:
+				cyclesUsed = Instruction.add_A_D();
+			break;
+			case 0x83:
+				cyclesUsed = Instruction.add_A_E();
+			break;
+			case 0x84:
+				cyclesUsed = Instruction.add_A_H();
+			break;
+			case 0x85:
+				cyclesUsed = Instruction.add_A_L();
+			break;
+			case 0x86:
+				cyclesUsed = Instruction.add_A_$HL();
 			break;
 			case 0x87:
 				cyclesUsed = Instruction.add_A_A();
@@ -278,15 +314,51 @@ public class CPU extends Thread
 			case 0xAF:
 				cyclesUsed = Instruction.xor_A();
 			break;
+			case 0xC1:
+				cyclesUsed = Instruction.pop_BC();
+			break;
 			case 0xC3:
 				cyclesUsed = Instruction.jp_nn();
+			break;
+			case 0xC5:
+				cyclesUsed = Instruction.push_BC();
+			break;
+			case 0xC6:
+				cyclesUsed = Instruction.add_A_n();
+			break;
+			case 0xD1:
+				cyclesUsed = Instruction.pop_DE();
+			break;
+			case 0xD5:
+				cyclesUsed = Instruction.push_DE();
+			break;
+			case 0xD9:
+				cyclesUsed = Instruction.reti();
+			break;
+			case 0xE1:
+				cyclesUsed = Instruction.pop_HL();
+			break;
+			case 0xE5:
+				cyclesUsed = Instruction.push_HL();
 			break;
 			case 0xEE:
 				cyclesUsed = Instruction.xor_n();
 			break;
+			case 0xF1:
+				cyclesUsed = Instruction.pop_AF();
+			break;
+			case 0xF3:
+				cyclesUsed = Instruction.di();
+			break;
+			case 0xF5:
+				cyclesUsed = Instruction.push_AF();
+			break;
+			case 0xFB:
+				cyclesUsed = Instruction.ei();
+			break;
 		}
 
 		nextCycle += (cyclesUsed * INSTR_TIME_STEP);
-		return (cyclesUsed << 10);
+		return (cyclesUsed << 2);
 	}
 }
