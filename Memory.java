@@ -26,7 +26,7 @@ public class Memory
 		}
 		else if(address < 0xFE00)//Both workRAM banks + mirror
 		{
-			//data = InternalRAM.read(address);
+			data = InternalRAM.read(address);
 		}
 		else if(address < 0xFEA0)//OAM
 		{
@@ -43,11 +43,11 @@ public class Memory
 		}
 		else if(address < 0xFFFF)//High RAM
 		{
-			//data = InternalRAM.read(address);
+			data = InternalRAM.read(address);
 		}
 		else if(address == 0xFFFF)//Internal Enable Register
 		{
-			//data = Interrupt.read(address);
+			data = Interrupt.read();
 		}
 		else
 		{
@@ -73,7 +73,7 @@ public class Memory
 			}
 			else if(address < 0xFE00)//Both workRAM banks + mirror
 			{
-				//InternalRAM.write(address, data);
+				InternalRAM.write(address, data);
 			}
 			else if(address < 0xFEA0)//OAM
 			{
@@ -89,11 +89,11 @@ public class Memory
 			}
 			else if(address < 0xFFFF)//High RAM
 			{
-				//InternalRAM.write(address, data);
+				InternalRAM.write(address, data);
 			}
 			else if(address == 0xFFFF)//Internal Enable Register
 			{
-				//Interrupt.write(address, data);
+				Interrupt.write(data);
 			}
 			else
 			{
