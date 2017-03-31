@@ -1,12 +1,14 @@
 /*
 
 What needs to happen:
-	*Implement screen drawer(possibly here or in VRAM, probably here)
 
 */
 
 import javax.swing.JPanel;
 import java.awt.*;
+
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class Screen extends JPanel
 {
@@ -26,11 +28,16 @@ public class Screen extends JPanel
 
 	public int scale = 4;
 
+	private Timer screenTimer;
+
 	public Screen()
 	{
 		setBackground(color0);
 		setPreferredSize(new Dimension(SCREEN_SIZE_X * scale, SCREEN_SIZE_Y * scale));
 		screen = new int[SCREEN_SIZE_X][SCREEN_SIZE_Y];
+
+		screenTimer = new Timer();
+		screenTimer.schedule(new ScreenTimer(this), 0, 9);
 	}
 
 	public void paintComponent(Graphics page)
@@ -38,16 +45,32 @@ public class Screen extends JPanel
 		draw(page);
 	}
 
+	class ScreenTimer extends TimerTask
+	{
+		private Screen timerScreen;
+
+		public ScreenTimer(Screen newScreen)
+		{
+			timerScreen = newScreen;
+		}
+
+		public void run()
+		{
+			timerScreen.update();
+		}
+	}
+
 	public void update()
 	{
-		if((nextClock <= CPU.clock) && ((IO.LCDC & 0x80) == 0x80))
+		while((nextClock <= CPU.clock) && ((IO.LCDC & 0x80) == 0x80))
 		{
+			//System.out.printf("\nDEBUG: IO.LY=%d\n", IO.LY);
 			int mode = (IO.STAT & 0x03);
 
 			switch(mode)
 			{
 				case 0:
-					if(IO.LY == 143)
+					if(IO.LY == 144)
 					{
 						IO.STAT = (IO.STAT & 0xFC) | 0x1;
 					}
@@ -57,7 +80,10 @@ public class Screen extends JPanel
 					}
 				break;
 				case 1:
-					IO.STAT = (IO.STAT & 0xFC) | 0x2;
+					if(IO.LY == 0)
+					{
+						IO.STAT = (IO.STAT & 0xFC) | 0x2;
+					}
 				break;
 				case 2:
 					IO.STAT = (IO.STAT & 0xFC) | 0x3;
@@ -71,23 +97,38 @@ public class Screen extends JPanel
 			}
 
 			mode = (IO.STAT & 0x03);
+			//System.out.printf("\nDEBUG: LY=%03d Mode=%d", IO.LY, mode);
 
 			switch(mode)
 			{
 				case 0: //H-blank
+					//update current scanline
+					IO.LY += 1;
+					checkLCDStatInterrupts();
 					nextClock += 204;
 				break;
 				case 1: //V-blank
-					IO.IF = IO.IF | 0x01;
-					repaint();
-					/*long currentTime = System.nanoTime();
-					double fps = 1000000000.0 / (currentTime - lastTime);
-					lastTime = currentTime;
-					System.out.println("fps: " + fps);//*/
-					IO.LY = -1;
-					nextClock += 4560;
+					IO.LY += 1;
+
+					if(IO.LY == 154)
+					{
+						IO.LY = 0;
+					}
+					checkLCDStatInterrupts();
+					if(IO.LY == 145)
+					{
+						IO.IF = IO.IF | 0x01;
+						repaint();
+
+						/*long currentTime = System.nanoTime();
+						double fps = 1000000000.0 / (currentTime - lastTime);
+						lastTime = currentTime;
+						System.out.println("fps: " + fps);//*/
+					}
+					nextClock += 456;
 				break;
 				case 2: //Searching OAM-RAM
+					checkLCDStatInterrupts();
 					nextClock += 80;
 				break;
 				case 3: //Transfering Data to LCD Driver
@@ -98,13 +139,13 @@ public class Screen extends JPanel
 					System.out.println("\nDEBUG: Something went wrong with the Screen Controller. Mode " + mode + ".");
 				break;
 			}
+
 		}
 	}
 
 	public void scanline()
 	{
-		//update current scanline
-		IO.LY += 1;
+
 
 		int currentBgLine = (IO.LY + IO.SCY) % 256;
 
@@ -125,7 +166,7 @@ public class Screen extends JPanel
 			//fill the current line of background
 			for(int currentTile = 0; currentTile < 32; currentTile++)
 			{
-				int tileIndex = Memory.read(baseBgMapAddress + ((currentBgLine / 8) + currentTile));
+				int tileIndex = Memory.read(baseBgMapAddress + (((currentBgLine / 8) * 0x20) + currentTile));
 
 				int tileAddress = bgWinTileAddress(tileIndex);
 				//which line in tile
@@ -151,9 +192,16 @@ public class Screen extends JPanel
 			}
 
 			//copy bg to screen
-			for(int pixel = 0; pixel < SCREEN_SIZE_X; pixel++)
+			if(IO.LY < 144)
 			{
-				screen[pixel][IO.LY] = bgPallet[fullBgLine[((pixel + IO.SCX) % 256)]];
+				for(int pixel = 0; pixel < SCREEN_SIZE_X; pixel++)
+				{
+					screen[pixel][IO.LY] = bgPallet[fullBgLine[((pixel + IO.SCX) % 256)]];
+				}
+			}
+			else
+			{
+				System.out.println("DEBUG: Tried writing to the screen space during V-Sync. Out of bounds.\n\n");
 			}
 		}
 	}
@@ -211,6 +259,48 @@ public class Screen extends JPanel
 			address = 0x8800 + (((tileIndex ^ 0x80) * 0x10) * 16);
 		}
 		return (address & 0xFFFF);
+	}
+
+	public void checkLCDStatInterrupts()
+	{
+		if((IO.STAT & 0x40) == 0x40)
+		{
+			//check to see if LYC == LY
+			if(IO.LY == IO.LYC)
+			{
+				//set STAT interrupt
+			}
+		}
+		else if((IO.STAT & 0x20) == 0x20)
+		{
+			//check to see if mode 2(Searching OAM)
+			int mode = (IO.STAT & 0x03);
+			if(mode == 2)
+			{
+				//set STAT interrupt
+				IO.IF = IO.IF | 0x02;
+			}
+		}
+		else if((IO.STAT & 0x10) == 0x10)
+		{
+			//check to see if mode 1(V-blank)
+			int mode = (IO.STAT & 0x03);
+			if(mode == 1)
+			{
+				//set STAT interrupt
+				IO.IF = IO.IF | 0x02;
+			}
+		}
+		else if((IO.STAT & 0x08) == 0x08)
+		{
+			//check to see if mode 0(H-blank)
+			int mode = (IO.STAT & 0x03);
+			if(mode == 0)
+			{
+				//set STAT interrupt
+				IO.IF = IO.IF | 0x02;
+			}
+		}
 	}
 
 	public void loadTile(int xOff, int yOff, int[][] tile)

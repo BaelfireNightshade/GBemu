@@ -3,6 +3,12 @@ public class InternalRAM
 	private static int[] ram = new int[(0xE000 - 0xC000)]; //Normal internal RAM
 	private static int[] highRam = new int[(0xFFFF - 0xFF80)]; //High RAM
 
+	public static void reset()
+	{
+		ram = new int[(0xE000 - 0xC000)]; //Normal internal RAM
+		highRam = new int[(0xFFFF - 0xFF80)]; //High RAM
+	}
+
 	public static int read(int address)
 	{
 		int data;
@@ -19,6 +25,11 @@ public class InternalRAM
 		{
 			data = highRam[address - 0xFF80];
 		}
+
+		// if(address == 0xFF85 & data == 0x01)
+		// {
+		// 	System.out.printf("reading from address 0xFF85 data = 0x01\n");
+		// }
 
 		return data;
 	}

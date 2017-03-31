@@ -4,6 +4,12 @@ public class Interrupt
 
 	public static boolean IME = false; //Interrupt Master Enable Flag
 
+	public static void reset()
+	{
+		interruptEnable = 0x00;
+		IME = false;
+	}
+
 	public static int read()
 	{
 		return (interruptEnable & 0xFF);

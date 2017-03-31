@@ -52,8 +52,10 @@ public class Cartridge
 
 	public static void selectROM() throws IOException
 	{
+		GameboyEmu.cpu.pause();
+
 		//ask the user for a rom
-		final JFileChooser fc = new JFileChooser();
+		final JFileChooser fc = new JFileChooser("./");
 		FileNameExtensionFilter filter = new FileNameExtensionFilter("Gameboy Rom Images", "gb");
 		fc.setFileFilter(filter);
 		int returnVal = fc.showOpenDialog(GameboyEmu.frame);
@@ -166,6 +168,117 @@ public class Cartridge
 			default:
 				System.out.printf("DEBUG: Cartridge Type unknown. rom[0x0147]: %02X\n", rom[CART_TYPE_ADDRESS]);
 		}
+
+		GameboyEmu.cpu.reset();
+		GameboyEmu.cpu.start();
+	}
+
+	public static void openROM(String path) throws IOException
+	{
+		File file = new File(path);
+
+		FileInputStream in = null;
+		if(file != null)
+		{
+			try
+			{
+				in = new FileInputStream(file);
+				int length = in.available();//get length of the rom file
+				rom = new int[length];//make the rom array big enough to hold it.
+				for(int address = 0; address < length; address++)
+				{
+					rom[address] = in.read();//copy from file to rom array
+				}
+			}
+			finally
+			{
+				if(in != null)
+				{
+					in.close();//close the file if something goes wrong
+				}
+			}
+		}
+
+		//Close the file now that it's been loaded.
+		if(in != null)
+		{
+			in.close();
+		}
+
+		//set the title of the window to include the title of the game
+		String cartTitle = new String();
+		for(int i = 0x134; i < 0x143; i++)
+		{
+			cartTitle = cartTitle + (char)read(i);
+		}
+		title = cartTitle;
+		System.out.println("Cartridge Title: " + title);
+
+		//set the size of RAM
+		switch(rom[RAM_SIZE_ADDRESS])
+		{
+			case 0x00:
+				RAMSize = 0;// No RAM
+				break;
+			case 0x01:
+				RAMSize = 2 * 1024; // 2KBytes
+				break;
+			case 0x02:
+				RAMSize = 8 * 1024; // 8KBytes
+				break;
+			case 0x03:
+				RAMSize = 32 * 1024;
+		}
+		ram = new int[RAMSize];
+		System.out.println("Number of RAM Banks: " + rom[RAM_SIZE_ADDRESS]);
+
+		//set the MBC type
+		switch(rom[CART_TYPE_ADDRESS])
+		{
+			case 0x00:
+			case 0x08:
+			case 0x09:
+				mbc = MBC_NONE;
+				System.out.println("Cartridge Type: MBC_NONE");
+				break;
+			case 0x01:
+			case 0x02:
+			case 0x03:
+				mbc = MBC_MBC1;
+				System.out.println("Cartridge Type: MBC_MBC1");
+				break;
+			case 0x05:
+			case 0x06:
+				mbc = MBC_MBC2;
+				System.out.println("Cartridge Type: MBC_MBC2");
+				break;
+			case 0x0F:
+			case 0x10:
+			case 0x11:
+			case 0x12:
+			case 0x13:
+				mbc = MBC_MBC3;
+				System.out.println("Cartridge Type: MBC_MBC3");
+				break;
+			case 0x19:
+			case 0x1A:
+			case 0x1B:
+			case 0x1C:
+			case 0x1D:
+			case 0x1E:
+				mbc = MBC_MBC5;
+				System.out.println("Cartridge Type: MBC_MBC5");
+				break;
+			case 0xFF:
+				mbc = MBC_HuC1;
+				System.out.println("Cartridge Type: MBC_HuC1");
+				break;
+			default:
+				System.out.printf("DEBUG: Cartridge Type unknown. rom[0x0147]: %02X\n", rom[CART_TYPE_ADDRESS]);
+		}
+
+		GameboyEmu.cpu.reset();
+		GameboyEmu.cpu.start();
 	}
 
 	public static int read(int address)
@@ -214,6 +327,40 @@ public class Cartridge
 				return 0xFF;
 			}
 		}
+		else if(mbc == MBC_MBC3)
+		{
+			if(address < 0x4000)
+			{
+				return rom[address];
+			}
+			else if(address < 0x8000)
+			{
+				if(ROMBank != 0)
+				{
+					return rom[address - 0x4000 + (0x4000 * ROMBank)];
+				}
+				else
+				{
+					return rom[address];
+				}
+			}
+			else if((address < 0xC000))
+			{
+				if(RAMBank < 8)
+				{
+					return ram[(RAMBank * 8 * 1024) + (address - 0xA000)];
+				}
+				else //if() //RTC Registers
+				{
+					System.out.println("MBC3: Tried reading from RTC. Unimplemented");
+					return 0x00;
+				}
+			}
+			else
+			{
+				return 0xFF;
+			}
+		}
 		else
 		{
 			return 0xFF;
@@ -224,7 +371,7 @@ public class Cartridge
 	{
 		if(mbc == MBC_NONE)
 		{
-			System.out.println("ERROR: Tried writing to ROM on MBC_NONE");
+			System.out.printf("ERROR: Tried writing to ROM on MBC_NONE. PC=0x%04X\n", Register.readPC());
 		}
 		else if(mbc == MBC_MBC1)
 		{
@@ -246,31 +393,71 @@ public class Cartridge
 			{
 				//lower 5 bits of ROM bank number (0x01 - 0x1F)
 				ROMBank = data & 0xFF;
-				System.out.printf("MBC1: Changing ROM bank number to 0x%02X", ROMBank);
+				System.out.printf("MBC1: Changing ROM bank number to 0x%02X\n", ROMBank);
 			}
 			else if(address < 0x6000)
 			{
 				//upper 2 bits ROM bank/RAM bank number
 				RAMBank = data & 0xFF;
-				System.out.printf("MBC1: Changing RAM bank number to 0x%02X", RAMBank);
+				System.out.printf("MBC1: Changing RAM bank number to 0x%02X\n", RAMBank);
 			}
 			else if(address < 0x8000)
 			{
 				//ROM/RAM select
 				romRamSelect = data & 0x01;
-				System.out.printf("MBC1: Changing ROM/RAM select to 0x%02X", romRamSelect);
+				System.out.printf("MBC1: Changing ROM/RAM select to 0x%02X\n", romRamSelect);
 			}
 			else if((address >= 0xA000) && (address < 0xC000) && (ramEnable == 1))//writing to RAM
 			{
 				if(romRamSelect == ROM)
 				{
 					ram[address - 0xA000] = data & 0xFF;
-					System.out.printf("MBC1: Writing to RAM address 0x%04X, 0x%02X", address, ram[address - 0xA000]);
+					System.out.printf("MBC1: Writing to RAM address 0x%04X, 0x%02X\n", address, ram[address - 0xA000]);
 				}
 				else
 				{
 					ram[(RAMBank * 8 * 1024) + (address - 0xA000)] = data & 0xFF;
-					System.out.printf("MBC1: Writing to RAM address 0x%04X, 0x%02X\n", address, ram[(RAMBank * 8 * 1024) + (address - 0xA000)]);
+					System.out.printf("MBC1: Writing to RAM address 0x%04X, 0x%02X\n\n", address, ram[(RAMBank * 8 * 1024) + (address - 0xA000)]);
+				}
+			}
+		}
+		else if(mbc == MBC_MBC3)
+		{
+			if(address < 0x2000)
+			{
+				//RAM Enable
+				if((data & 0x0F) == 0x0A)
+				{
+					ramEnable = 1;
+					System.out.println("MBC3: Enabling RAM");
+				}
+				else
+				{
+					ramEnable = 0;
+					System.out.println("MBC3: Disabling RAM");
+				}
+			}
+			else if(address < 0x4000)
+			{
+				ROMBank = data & 0x7F;
+			}
+			else if(address < 0x6000)
+			{
+				RAMBank = data;
+			}
+			else if(address < 0x8000)
+			{
+				System.out.println("MBC3: Tried writing to Latch Clock Data");
+			}
+			else if(address < 0xC000)
+			{
+				if(RAMBank < 8)
+				{
+					ram[(RAMBank * 8 * 1024) + (address - 0xA000)] = data & 0xFF;
+				}
+				else //if() //RTC Registers
+				{
+					System.out.println("MBC3: Tried writing to RTC. Unimplemented");
 				}
 			}
 		}

@@ -1,5 +1,42 @@
 public class BitTwiddling
 {
+
+	//rotates bits through byte
+	public static int rorByte(int x, int n)
+	{
+		int result = (x >>> n) | (x << (8 - n));
+
+		return result & 0xFF;
+	}
+
+	public static int rolByte(int x, int n)
+	{
+		int result = (x << n) | (x >>> (8 - n));
+
+		return result & 0xFF;
+	}
+
+	//swaps upper and lower nibbles of a byte
+	public static int swapNibbles(int x)
+	{
+		int a = (0xF0 & x) >>> 4;
+		int b = 0x0F & x;
+
+		int result = a | (b << 4);
+		return result;
+	}
+
+	//extends sign from 8 bit number to 16 bit number
+	public static int signExt8to16(int x)
+	{
+		int b = 8;
+		int r;
+		int m = 128;
+		r = (x ^ m) - m;
+		return (r & 0xFFFF);
+	}
+
+
 	//interleaves bits with bits from x in the even and y in odd
 	public static int interleave(int x, int y)
 	{

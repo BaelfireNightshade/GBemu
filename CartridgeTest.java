@@ -61,9 +61,4 @@ public class CartridgeTest
 		Cartridge.write(address, data);
 		System.out.printf("The address 0x%04X contains 0x%02X\n", address, Cartridge.read(address));
 	}
-
-	public static void main(String [] args)
-	{
-		GameboyEmu.main(null);
-	}
 }

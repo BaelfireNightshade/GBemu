@@ -30,6 +30,16 @@ public class Register
 		return regAF;
 	}
 
+	public static void decAF()
+	{
+		regAF = (regAF - 1) & 0xFFFF;
+	}
+
+	public static void incAF()
+	{
+		regAF = (regAF + 1) & 0xFFFF;
+	}
+
 	public static void writeA(int data)
 	{
 		regAF = ((data & 0xFF) << 8) | (regAF & 0xFF);
@@ -60,6 +70,16 @@ public class Register
 	public static int readBC()
 	{
 		return regBC;
+	}
+
+	public static void decBC()
+	{
+		regBC = (regBC - 1) & 0xFFFF;
+	}
+
+	public static void incBC()
+	{
+		regBC = (regBC + 1) & 0xFFFF;
 	}
 
 	public static void writeB(int data)
@@ -94,6 +114,16 @@ public class Register
 		return regDE;
 	}
 
+	public static void decDE()
+	{
+		regDE = (regDE - 1) & 0xFFFF;
+	}
+
+	public static void incDE()
+	{
+		regDE = (regDE + 1) & 0xFFFF;
+	}
+
 	public static void writeD(int data)
 	{
 		regDE = ((data & 0xFF) << 8) | (regDE & 0xFF);
@@ -124,6 +154,16 @@ public class Register
 	public static int readHL()
 	{
 		return regHL;
+	}
+
+	public static void decHL()
+	{
+		regHL = (regHL - 1) & 0xFFFF;
+	}
+
+	public static void incHL()
+	{
+		regHL = (regHL + 1) & 0xFFFF;
 	}
 
 	public static void writeH(int data)
@@ -270,12 +310,10 @@ public class Register
 	public static void dumpRegisters()
 	{
 		System.out.println("DEBUG: Dumping Registers to console");
-		System.out.printf("\n\trA: 0x%02X\n", Register.readA());
-		System.out.printf("\trF: 0x%02X\n", Register.readF());
-		System.out.printf("\trB: 0x%02X\n", Register.readB());
-		System.out.printf("\trC: 0x%02X\n", Register.readC());
-		System.out.printf("\trD: 0x%02X\n", Register.readD());
-		System.out.printf("\trE: 0x%02X\n", Register.readE());
+		System.out.printf("\n\trAF: 0x%04X\n", Register.readAF());
+		System.out.printf("\trBC: 0x%04X\n", Register.readBC());
+		System.out.printf("\trDE: 0x%04X\n", Register.readDE());
+		System.out.printf("\trHL: 0x%04X\n", Register.readHL());
 
 		System.out.println();
 
@@ -289,18 +327,19 @@ public class Register
 		System.out.println("\tN: " + Register.getSubtFlag());
 		System.out.println("\tH: " + Register.getHCarryFlag());
 		System.out.println("\tC: " + Register.getCarryFlag());
+
+		return;
 	}
 
 	public static void dumpRegisters(String message)
 	{
 		System.out.println("DEBUG: " + message);
 		System.out.println("DEBUG: Dumping Registers to console");
-		System.out.printf("\n\trA: 0x%02X\n", Register.readA());
-		System.out.printf("\trF: 0x%02X\n", Register.readF());
-		System.out.printf("\trB: 0x%02X\n", Register.readB());
-		System.out.printf("\trC: 0x%02X\n", Register.readC());
-		System.out.printf("\trD: 0x%02X\n", Register.readD());
-		System.out.printf("\trE: 0x%02X\n", Register.readE());
+		System.out.printf("\n\trAF: 0x%04X\n", Register.readAF());
+		System.out.printf("\trBC: 0x%04X\n", Register.readBC());
+		System.out.printf("\trDE: 0x%04X\n", Register.readDE());
+		System.out.printf("\trHL: 0x%04X\n", Register.readHL());
+
 
 		System.out.println();
 
@@ -314,6 +353,8 @@ public class Register
 		System.out.println("\tN: " + Register.getSubtFlag());
 		System.out.println("\tH: " + Register.getHCarryFlag());
 		System.out.println("\tC: " + Register.getCarryFlag());
+
+		return;
 	}
 
 

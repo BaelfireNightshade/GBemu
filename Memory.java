@@ -1,13 +1,22 @@
 /*
 
 What needs to happen:
-	*Implement ROM.read()/write() when ROM class is ready
-	*Change ROM & ExternalRAM classes to Cartridge class
 
 */
 
 public class Memory
 {
+	//debug switches
+	private static final boolean DEBUG_INV_MEM = false;
+
+	public static void reset()
+	{
+		InternalRAM.reset();
+		SpriteAttribMemory.reset();
+		//IO.reset();
+		Interrupt.reset();
+	}
+
 	public static int read(int address)
 	{
 		//System.out.printf("DEBUG: Memory read: 0x%04X\n", address);
@@ -22,7 +31,8 @@ public class Memory
 		}
 		else if(address < 0xC000)//Cartrige RAM
 		{
-			//data = Cartridge.read(address);
+			data = Cartridge.read(address);
+			System.out.printf("DEBUG: Tried reading from unimplemented Cart RAM 0x%04X\n", address);
 		}
 		else if(address < 0xFE00)//Both workRAM banks + mirror
 		{
@@ -30,12 +40,17 @@ public class Memory
 		}
 		else if(address < 0xFEA0)//OAM
 		{
-			//data = SprintAttribMemory.read(address);
+			data = SpriteAttribMemory.read(address);
 		}
 		else if(address < 0xFF00)//Not useable
 		{
-			System.out.printf("DEBUG: Tried accessing invalid memory address: 0x%04X\n" , address);
-			data = 0xFF;
+			if(DEBUG_INV_MEM)
+			{
+				System.out.printf("DEBUG: Tried reading invalid memory address: 0x%04X\n" , address);
+				Register.dumpRegisters();
+			}
+
+			data = 0x00;
 		}
 		else if(address < 0xFF80)//I/0 Ports
 		{
@@ -77,11 +92,16 @@ public class Memory
 			}
 			else if(address < 0xFEA0)//OAM
 			{
-				//SprintAttribMemory.write(address, data);
+				SpriteAttribMemory.write(address, data);
 			}
 			else if(address < 0xFF00)//Not useable
 			{
-				System.out.printf("DEBUG: Tried accessing invalid memory address: 0x%04X\n" , address);
+				if(DEBUG_INV_MEM)
+				{
+					System.out.printf("DEBUG: Tried writing invalid memory address: 0x%04X\n" , address);
+					Register.dumpRegisters();
+				}
+
 			}
 			else if(address < 0xFF80)//I/0 Ports
 			{
@@ -99,5 +119,25 @@ public class Memory
 			{
 				System.out.printf("DEBUG: Something is wrong with the memory manager, None of the modules were selected address: 0x%04X\n", address);
 			}
+	}
+
+	public static void dumpStack(int number)
+	{
+		int sp = Register.readSP();
+		System.out.println("DEBUG: Dumping stack\n");
+
+		for(int x = number; x > number; x--)
+		{
+			if(x == 0)
+			{
+				System.out.print("\t>");
+			}
+			else
+			{
+				System.out.print("\t ");
+			}
+			int address = sp + (x * 2);
+			System.out.printf("0x%04X: %02X%02X\n", address, Memory.read(address), Memory.read(address + 1));
+		}
 	}
 }

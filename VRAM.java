@@ -4,6 +4,13 @@ public class VRAM
 	private static int[] bgMap0 = new int [(0x9BFF - 0x9800 + 1)];
 	private static int[] bgMap1 = new int [(0x9FFF - 0x9C00 + 1)];
 
+	public static void reset()
+	{
+		tileData = new int[(0x97FF - 0x8000 + 1)];
+		bgMap0 = new int [(0x9BFF - 0x9800 + 1)];
+		bgMap1 = new int [(0x9FFF - 0x9C00 + 1)];
+	}
+
 	public static int read(int address)
 	{
 		int data;
